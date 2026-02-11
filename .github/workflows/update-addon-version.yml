@@ -1,0 +1,133 @@
+name: Update Addon Version
+
+on:
+  repository_dispatch:
+    types: [update-addon-version]
+  workflow_dispatch:
+    inputs:
+      addon_name:
+        description: 'Name of the addon directory (e.g., otter)'
+        required: true
+        type: string
+      source_repo:
+        description: 'Source repository (e.g., kamilczerw/otter)'
+        required: true
+        type: string
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set addon variables
+        id: vars
+        run: |
+          # Get addon name and source repo from either workflow_dispatch or repository_dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ADDON_NAME="${{ inputs.addon_name }}"
+            SOURCE_REPO="${{ inputs.source_repo }}"
+          else
+            ADDON_NAME="${{ github.event.client_payload.addon_name }}"
+            SOURCE_REPO="${{ github.event.client_payload.source_repo }}"
+          fi
+
+          echo "addon_name=${ADDON_NAME}" >> $GITHUB_OUTPUT
+          echo "source_repo=${SOURCE_REPO}" >> $GITHUB_OUTPUT
+          echo "config_file=${ADDON_NAME}/config.yaml" >> $GITHUB_OUTPUT
+          echo "changelog_file=${ADDON_NAME}/CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Get latest release from source repo
+        id: release
+        run: |
+          RELEASE_JSON=$(curl -s "https://api.github.com/repos/${{ steps.vars.outputs.source_repo }}/releases/latest")
+          LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '.tag_name' | sed 's/^v//')
+          RELEASE_BODY=$(echo "$RELEASE_JSON" | jq -r '.body')
+          RELEASE_NAME=$(echo "$RELEASE_JSON" | jq -r '.name')
+
+          echo "version=${LATEST_VERSION}" >> $GITHUB_OUTPUT
+          echo "release_name=${RELEASE_NAME}" >> $GITHUB_OUTPUT
+
+          # Save release body to a file to handle multiline content
+          echo "$RELEASE_BODY" > /tmp/release_body.txt
+
+      - name: Check current version
+        id: current
+        run: |
+          if [ ! -f "${{ steps.vars.outputs.config_file }}" ]; then
+            echo "Error: Config file not found at ${{ steps.vars.outputs.config_file }}"
+            exit 1
+          fi
+
+          CURRENT_VERSION=$(grep '^version:' "${{ steps.vars.outputs.config_file }}" | sed 's/version: *"\(.*\)"/\1/')
+          echo "version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+
+          echo "Current version: ${CURRENT_VERSION}"
+          echo "Latest version: ${{ steps.release.outputs.version }}"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          if [ "${{ steps.current.outputs.version }}" = "${{ steps.release.outputs.version }}" ]; then
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "Version is already up to date"
+          else
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "Version needs to be updated"
+          fi
+
+      - name: Update config.yaml
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          sed -i 's/^version: *".*"/version: "${{ steps.release.outputs.version }}"/' "${{ steps.vars.outputs.config_file }}"
+          echo "Updated version in ${{ steps.vars.outputs.config_file }}"
+
+      - name: Update CHANGELOG.md
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          CHANGELOG_FILE="${{ steps.vars.outputs.changelog_file }}"
+          RELEASE_BODY=$(cat /tmp/release_body.txt)
+
+          # Create temporary file with new entry
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## ${{ steps.release.outputs.version }}"
+            echo ""
+            echo "$RELEASE_BODY"
+            echo ""
+          } > /tmp/new_changelog.md
+
+          # Append existing changelog content (skip the header if it exists)
+          if [ -f "$CHANGELOG_FILE" ]; then
+            tail -n +2 "$CHANGELOG_FILE" >> /tmp/new_changelog.md
+          fi
+
+          # Replace the changelog
+          mv /tmp/new_changelog.md "$CHANGELOG_FILE"
+          echo "Updated $CHANGELOG_FILE"
+
+      - name: Commit and push changes
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "${{ steps.vars.outputs.config_file }}" "${{ steps.vars.outputs.changelog_file }}"
+          git commit -m "Update ${{ steps.vars.outputs.addon_name }} to version ${{ steps.release.outputs.version }}"
+          git push
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.compare.outputs.needs_update }}" = "true" ]; then
+            echo "✅ Updated ${{ steps.vars.outputs.addon_name }} from ${{ steps.current.outputs.version }} to ${{ steps.release.outputs.version }}"
+          else
+            echo "ℹ️ No update needed. ${{ steps.vars.outputs.addon_name }} is already at version ${{ steps.release.outputs.version }}"
+          fi
