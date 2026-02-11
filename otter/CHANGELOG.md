@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.11
+
+null
+
+
 ## 1.0.9
 
 null
