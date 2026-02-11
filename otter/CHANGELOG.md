@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.1.0...1.2.0
+
+
 ## 1.1.0
 
 **Full Changelog**: https://github.com/kamilczerw/otter/compare/1.0.11...1.1.0
