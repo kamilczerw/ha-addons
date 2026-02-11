@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       addon_name:
-        description: 'Name of the addon directory (e.g., otter)'
+        description: "Name of the addon directory (e.g., otter)"
         required: true
         type: string
       source_repo:
-        description: 'Source repository (e.g., kamilczerw/otter)'
+        description: "Source repository (e.g., kamilczerw/otter)"
         required: true
         type: string
 
