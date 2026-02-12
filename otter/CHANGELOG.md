@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+## What's Changed
+* Add configurable color thresholds for budget bar visualization by @kamilczerw in https://github.com/kamilczerw/otter/pull/12
+* Add BudgetProgressBars component for horizontal budget category visualization by @kamilczerw in https://github.com/kamilczerw/otter/pull/13
+
+
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.2.0...1.3.0
+
+
 ## 1.2.0
 
 **Full Changelog**: https://github.com/kamilczerw/otter/compare/1.1.0...1.2.0
