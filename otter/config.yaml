@@ -7,7 +7,7 @@ image: "ghcr.io/kamilczerw/otter"
 arch:
   - amd64
 ingress: true
-ingress_port: 3000
+ingress_port: 42011
 ingress_entry: ui/
 panel_icon: "mdi:piggy-bank"
 panel_title: "Otter Budget Tracker"
@@ -17,7 +17,7 @@ journald: true
 # server_host, server_port, and database_url are not exposed as options
 # because they are fixed in the add-on container environment:
 # - host is always 0.0.0.0 (container networking)
-# - port must match ingress_port (3000)
+# - port must match ingress_port (42011)
 # - database is always at /data/budget.db (HA persistent storage)
 options:
   currency_code: "PLN"
@@ -33,4 +33,4 @@ map:
 environment:
   APP__DATABASE__URL: "sqlite:///data/budget.db"
 ports:
-  3000/tcp: 13000
+  42011/tcp: 42011
