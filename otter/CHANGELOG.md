@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0
+
+## What's Changed
+* Redesign overspent budget bars and improve text legibility by @kamilczerw in https://github.com/kamilczerw/otter/pull/14
+
+
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.3.0...1.4.0
+
+
 ## 1.3.4
 
 ## What's Changed
