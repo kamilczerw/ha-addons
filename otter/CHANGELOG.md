@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.1
+
+## What's Changed
+* Add implementation plan for interactive budget bar expand feature by @kamilczerw in https://github.com/kamilczerw/otter/pull/15
+* Implement interactive budget bar expand with accordion panels by @kamilczerw in https://github.com/kamilczerw/otter/pull/16
+
+
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.4.0...1.4.1
+
+
 ## 1.4.0
 
 ## What's Changed
