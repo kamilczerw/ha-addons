@@ -39,6 +39,7 @@ This is Kamil's Home Assistant add-ons repository.
 - `otter/translations/`: option labels/descriptions shown in Home Assistant.
 - `otter/DOCS.md`: user-facing add-on documentation.
 - `otter/CHANGELOG.md`: release notes for add-on updates.
+- `flake.nix` and `nix/`: Nix development shell, add-on metadata checks, packaging outputs, tarball outputs, and Docker build helper scripts.
 
 ## Boundaries
 

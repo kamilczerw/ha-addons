@@ -10,6 +10,7 @@ This repository contains Home Assistant add-ons. Keep this file short so agents 
 ## Task-specific guides
 
 - [Home Assistant add-on guide](.agents/home-assistant-addons.md) - add-on manifests, Docker images, s6 services, translations, releases.
+- [New Addon skill](.agents/skills/new-addon.md) - reusable process and boilerplate checklist for adding another add-on.
 - [Validation checklist](.agents/validation.md) - checks to run before reporting completion.
 
 ## Context-loading rule

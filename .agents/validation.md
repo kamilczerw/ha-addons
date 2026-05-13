@@ -38,6 +38,22 @@ For each changed add-on:
 - Ports and ingress settings align with Docker/runtime configuration.
 - Persistent data stays under `/data` unless migration is included.
 
+## Nix checks
+
+When Nix is available, prefer the shared flake checks:
+
+```bash
+nix flake check
+nix build .#repository
+```
+
+For a changed add-on, also run:
+
+```bash
+nix build .#addon-<slug>
+nix build .#addon-<slug>-tarball
+```
+
 ## Docker-related checks
 
 If Docker is available and the build context is complete, run a build for the changed add-on. For example:

@@ -1,0 +1,26 @@
+_default:
+  @just --list
+
+## Enter the Nix development shell.
+shell:
+  nix develop
+
+## Run all flake checks.
+check:
+  nix flake check
+
+## Build the packaged repository output.
+build:
+  nix build .#repository
+
+## Build a packaged add-on directory, e.g. `just -f nix/Justfile addon otter`.
+addon name:
+  nix build .#addon-{{name}}
+
+## Build an add-on tarball, e.g. `just -f nix/Justfile tarball otter`.
+tarball name:
+  nix build .#addon-{{name}}-tarball
+
+## Build an add-on Docker image using the add-on Dockerfile.
+docker name tag="":
+  nix run .#build-{{name}}-docker -- {{tag}}
