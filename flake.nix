@@ -39,6 +39,9 @@
       in
       {
         inherit packages checks devShells;
+        buildableAddons = map (a: { inherit (a) name relPath image; }) (
+          builtins.filter (a: a.buildInRepo) config.addons
+        );
       }
     );
 }
