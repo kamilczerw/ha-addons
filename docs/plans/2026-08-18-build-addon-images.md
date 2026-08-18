@@ -268,7 +268,7 @@ echo '[{"name":"forgejo","relPath":"forgejo","image":"ghcr.io/kamilczerw/forgejo
 jq -nc --argjson buildable "$(cat /tmp/buildable.json)" --arg failsafe "false" --arg changed $'forgejo/config.yaml\nforgejo/CHANGELOG.md' '
   ($changed | split("\n")) as $files
   | $buildable
-  | map(select(($failsafe == "true") or (any($files[]; startswith(.relPath + "/")))))
+  | map(. as $addon | select(($failsafe == "true") or (any($files[]; startswith($addon.relPath + "/")))))
 '
 ```
 Expected: YAML parses OK, and the jq filter outputs only the `forgejo` entry (confirms an `otter`-only change would filter to `[]`).
