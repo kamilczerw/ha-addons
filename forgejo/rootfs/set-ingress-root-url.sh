@@ -44,8 +44,8 @@ if [ -n "${SUPERVISOR_TOKEN:-}" ]; then
   # "self" is a special add-on slug Supervisor resolves to "whichever add-on
   # is making this request", based on the SUPERVISOR_TOKEN presented.
   ingress_entry="$(curl -sf -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
-    http://supervisor/apps/self/info 2>/dev/null \
-    | jq -r '.data.ingress_entry // empty' 2>/dev/null || true)"
+    http://supervisor/apps/self/info 2>/dev/null |
+    jq -r '.data.ingress_entry // empty' 2>/dev/null || true)"
 
   if [ -n "${ingress_entry:-}" ]; then
     export GITEA__server__ROOT_URL="${ingress_entry}/"
