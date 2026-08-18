@@ -51,6 +51,7 @@ Add the add-on to `nix/config.nix`:
   path = ../<slug>;
   image = "ghcr.io/kamilczerw/<slug>";
   supportedArchitectures = [ "amd64" ];
+  buildInRepo = true; # false if the Dockerfile needs source not vendored in this repo
 }
 ```
 
