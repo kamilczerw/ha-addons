@@ -1,0 +1,24 @@
+name: Forgejo
+version: "16.0.2"
+slug: forgejo
+description: "Self-hosted, lightweight Git forge (Forgejo)"
+url: "https://forgejo.org"
+image: "ghcr.io/kamilczerw/forgejo"
+arch:
+  - amd64
+ingress: true
+ingress_port: 3000
+hassio_api: true
+panel_icon: "mdi:source-branch"
+panel_title: "Forgejo"
+homeassistant: "2024.1.0"
+journald: true
+map:
+  - type: data
+    read_only: false
+ports:
+  3000/tcp: 3000
+  22/tcp: 2222
+ports_description:
+  3000/tcp: "Forgejo web UI and git over HTTP(S)"
+  22/tcp: "Git over SSH"

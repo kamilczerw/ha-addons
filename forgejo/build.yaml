@@ -1,0 +1,2 @@
+build_from:
+  amd64: codeberg.org/forgejo/forgejo:16.0.2

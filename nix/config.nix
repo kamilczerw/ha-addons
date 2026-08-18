@@ -10,5 +10,12 @@
       image = "ghcr.io/kamilczerw/otter";
       supportedArchitectures = [ "amd64" ];
     }
+    {
+      name = "forgejo";
+      relPath = "forgejo";
+      path = ../forgejo;
+      image = "ghcr.io/kamilczerw/forgejo";
+      supportedArchitectures = [ "amd64" ];
+    }
   ];
 }
