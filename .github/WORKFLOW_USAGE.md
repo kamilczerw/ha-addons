@@ -27,8 +27,7 @@ Add this to your source repository's release workflow (e.g., `.github/workflows/
       -d '{
         "event_type": "update-addon-version",
         "client_payload": {
-          "addon_name": "otter",
-          "source_repo": "kamilczerw/otter"
+          "addon_name": "otter"
         }
       }'
 ```
@@ -55,11 +54,10 @@ You can also manually trigger the workflow:
 3. Click "Run workflow"
 4. Enter:
    - **addon_name**: The directory name (e.g., `otter`)
-   - **source_repo**: The source repository (e.g., `kamilczerw/otter`)
 
 ## What the Workflow Does
 
-1. ✅ Fetches the latest release from the source repository
+1. ✅ Resolves the source repository from the addon's `sourceRepo` field in `nix/config.nix` (supports both GitHub and Codeberg) and fetches its latest release
 2. ✅ Checks the current version in `<addon-name>/config.yaml`
 3. ✅ If versions differ:
    - Updates the `version` field in `config.yaml`

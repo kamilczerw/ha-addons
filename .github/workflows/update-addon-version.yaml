@@ -9,10 +9,6 @@ on:
         description: "Name of the addon directory (e.g., otter)"
         required: true
         type: string
-      source_repo:
-        description: "Source repository (e.g., kamilczerw/otter)"
-        required: true
-        type: string
 
 jobs:
   update-version:
@@ -27,27 +23,50 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
       - name: Set addon variables
         id: vars
         run: |
-          # Get addon name and source repo from either workflow_dispatch or repository_dispatch
+          # Get addon name from either workflow_dispatch or repository_dispatch
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ADDON_NAME="${{ inputs.addon_name }}"
-            SOURCE_REPO="${{ inputs.source_repo }}"
           else
             ADDON_NAME="${{ github.event.client_payload.addon_name }}"
-            SOURCE_REPO="${{ github.event.client_payload.source_repo }}"
           fi
 
           echo "addon_name=${ADDON_NAME}" >> $GITHUB_OUTPUT
-          echo "source_repo=${SOURCE_REPO}" >> $GITHUB_OUTPUT
           echo "config_file=${ADDON_NAME}/config.yaml" >> $GITHUB_OUTPUT
           echo "changelog_file=${ADDON_NAME}/CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Resolve addon source
+        id: source
+        run: |
+          ADDON_NAME="${{ steps.vars.outputs.addon_name }}"
+          SOURCES=$(nix eval --json .#addonSources.x86_64-linux)
+
+          ADDON=$(echo "$SOURCES" | jq -c --arg name "$ADDON_NAME" '.[] | select(.name == $name)')
+          if [ -z "$ADDON" ]; then
+            echo "::error::No addon named '${ADDON_NAME}' found in nix/config.nix"
+            exit 1
+          fi
+
+          echo "source_repo=$(echo "$ADDON" | jq -r '.sourceRepo')" >> $GITHUB_OUTPUT
+          echo "build_in_repo=$(echo "$ADDON" | jq -r '.buildInRepo')" >> $GITHUB_OUTPUT
 
       - name: Get latest release from source repo
         id: release
         run: |
-          RELEASE_JSON=$(curl -s "https://api.github.com/repos/${{ steps.vars.outputs.source_repo }}/releases/latest")
+          SOURCE_REPO="${{ steps.source.outputs.source_repo }}"
+
+          if [[ "$SOURCE_REPO" == codeberg.org/* ]]; then
+            REPO_PATH="${SOURCE_REPO#codeberg.org/}"
+            RELEASE_JSON=$(curl -s "https://codeberg.org/api/v1/repos/${REPO_PATH}/releases/latest")
+          else
+            RELEASE_JSON=$(curl -s "https://api.github.com/repos/${SOURCE_REPO}/releases/latest")
+          fi
+
           LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '.tag_name' | sed 's/^v//')
           RELEASE_BODY=$(echo "$RELEASE_JSON" | jq -r '.body')
           RELEASE_NAME=$(echo "$RELEASE_JSON" | jq -r '.name')
@@ -114,13 +133,27 @@ jobs:
           mv /tmp/new_changelog.md "$CHANGELOG_FILE"
           echo "Updated $CHANGELOG_FILE"
 
+      - name: Update pinned base image
+        if: steps.compare.outputs.needs_update == 'true' && steps.source.outputs.build_in_repo == 'true'
+        run: |
+          ADDON_NAME="${{ steps.vars.outputs.addon_name }}"
+          SOURCE_REPO="${{ steps.source.outputs.source_repo }}"
+          NEW_VERSION="${{ steps.release.outputs.version }}"
+
+          for f in "${ADDON_NAME}/Dockerfile" "${ADDON_NAME}/build.yaml"; do
+            sed -i "s|${SOURCE_REPO}:[^[:space:]\"]*|${SOURCE_REPO}:${NEW_VERSION}|g" "$f"
+            echo "Updated pinned base image in $f"
+          done
+
       - name: Commit and push changes
         if: steps.compare.outputs.needs_update == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add "${{ steps.vars.outputs.config_file }}" "${{ steps.vars.outputs.changelog_file }}"
+          ADDON_NAME="${{ steps.vars.outputs.addon_name }}"
+          git add "${{ steps.vars.outputs.config_file }}" "${{ steps.vars.outputs.changelog_file }}" \
+            "${ADDON_NAME}/Dockerfile" "${ADDON_NAME}/build.yaml"
           git commit -m "Update ${{ steps.vars.outputs.addon_name }} to version ${{ steps.release.outputs.version }}"
           git push
 

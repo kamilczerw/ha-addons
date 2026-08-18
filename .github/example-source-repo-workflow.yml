@@ -23,8 +23,7 @@ jobs:
             -d "{
               \"event_type\": \"update-addon-version\",
               \"client_payload\": {
-                \"addon_name\": \"${ADDON_NAME}\",
-                \"source_repo\": \"${GITHUB_REPOSITORY}\"
+                \"addon_name\": \"${ADDON_NAME}\"
               }
             }"
 
