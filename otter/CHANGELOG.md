@@ -1,9 +1,10 @@
 # Changelog
 
-## 1.4.2
+## 1.6.0
 
-**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.4.1...1.4.2
+- Add rules editor UI by @kamilczerw
 
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.5.0...1.6.0
 
 ## 1.5.0
 
