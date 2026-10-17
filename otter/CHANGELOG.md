@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1
+
+- Add `/share` dir to the addon
+
 ## 1.6.0
 
 - Add rules editor UI by @kamilczerw
