@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2
+
+**Full Changelog**: https://github.com/kamilczerw/otter/compare/1.4.1...1.4.2
+
+
 ## 1.6.1
 
 - Add `/share` dir to the addon
